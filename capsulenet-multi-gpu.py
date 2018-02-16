@@ -32,16 +32,19 @@ def train(model, data, args):
     # Unpacking the data.
     (x_train, y_train), (x_test, y_test) = data
 
-    # Callbacks
+    # Callbacks.
     log = callbacks.CSVLogger(args.save_dir + '/log.csv')
     tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
                                batch_size=args.batch_size, histogram_freq=args.debug)
-    lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (0.9 ** epoch))
+    checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
+                                           save_best_only=True, save_weights_only=True, verbose=1)
+    lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (args.lr_decay ** epoch))
 
     # Compile the model.
     model.compile(optimizer=optimizers.Adam(lr=args.lr),
                   loss=[margin_loss, 'mse'],
-                  loss_weights=[1., args.lam_recon])
+                  loss_weights=[1., args.lam_recon],
+                  metrics={'capsnet': 'accuracy'})
 
     """
     # Training without data augmentation:
@@ -63,8 +66,11 @@ def train(model, data, args):
                         steps_per_epoch=int(y_train.shape[0] / args.batch_size),
                         epochs=args.epochs,
                         validation_data=[[x_test, y_test], [y_test, x_test]],
-                        callbacks=[log, tb, lr_decay])
+                        callbacks=[log, tb, checkpoint, lr_decay])
     # End: Training with data augmentation -----------------------------------------------------------------------#
+
+    model.save_weights(args.save_dir + '/trained_model.h5')
+    print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
     from utils import plot_log
     plot_log(args.save_dir + '/log.csv', show=True)
@@ -73,20 +79,24 @@ def train(model, data, args):
 
 
 if __name__ == "__main__":
+    import os
+    import argparse
     import numpy as np
     import tensorflow as tf
-    import os
+
     from keras.preprocessing.image import ImageDataGenerator
     from keras import callbacks
     from keras.utils.vis_utils import plot_model
     from keras.utils import multi_gpu_model
 
     # Setting the hyper parameters.
-    import argparse
-
     Parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
     Parser.add_argument('--epochs', default=50, type=int)
     Parser.add_argument('--batch_size', default=300, type=int)
+    Parser.add_argument('--lr', default=0.001, type=float,
+                        help="Initial learning rate")
+    Parser.add_argument('--lr_decay', default=0.9, type=float,
+                        help="The value multiplied by lr at each epoch. Set a larger value for larger epochs")
     Parser.add_argument('--lam_recon', default=0.392, type=float,
                         help="The coefficient for the loss of decoder")
     Parser.add_argument('-r', '--routings', default=3, type=int,
@@ -102,8 +112,6 @@ if __name__ == "__main__":
                         help="Digit to manipulate")
     Parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
-    Parser.add_argument('--lr', default=0.001, type=float,
-                        help="Initial learning rate")
     Parser.add_argument('--gpus', default=2, type=int)
     Args = Parser.parse_args()
     print(Args)

@@ -104,7 +104,7 @@ def train(model, data, args):
     # Callbacks.
     log = callbacks.CSVLogger(args.save_dir + '/log.csv')
     tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
-                               batch_size=args.batch_size, histogram_freq=int(args.debug))
+                               batch_size=args.batch_size, histogram_freq=args.debug)
     checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
                                            save_best_only=True, save_weights_only=True, verbose=1)
     lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (args.lr_decay ** epoch))
@@ -207,13 +207,14 @@ def load_mnist():
 if __name__ == "__main__":
     import os
     import argparse
+
     from keras.preprocessing.image import ImageDataGenerator
     from keras import callbacks
 
     # Setting the hyper parameters.
     Parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
     Parser.add_argument('--epochs', default=50, type=int)
-    Parser.add_argument('--batch_size', default=100, type=int)
+    Parser.add_argument('--batch_size', default=300, type=int)
     Parser.add_argument('--lr', default=0.001, type=float,
                         help="Initial learning rate")
     Parser.add_argument('--lr_decay', default=0.9, type=float,
@@ -224,7 +225,7 @@ if __name__ == "__main__":
                         help="Number of iterations used in routing algorithm. should > 0")
     Parser.add_argument('--shift_fraction', default=0.1, type=float,
                         help="Fraction of pixels to shift at most in each direction.")
-    Parser.add_argument('--debug', action='store_true',
+    Parser.add_argument('--debug', default=0, type=int,
                         help="Save weights by TensorBoard")
     Parser.add_argument('--save_dir', default='./result')
     Parser.add_argument('-t', '--testing', action='store_true',
