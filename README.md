@@ -4,7 +4,10 @@
 A Keras implementation of CapsNet in the paper:   
 [Sara Sabour, Nicholas Frosst, Geoffrey E Hinton. Dynamic Routing Between Capsules. NIPS 2017](https://arxiv.org/abs/1710.09829)   
 The current `average test error = 0.34%` and `best test error = 0.30%`.   
- 
+
+**Disclaimer**
+This repo has been initially authored by Xifeng Guo, and refactored by Cem Anil.
+
 **Differences with the paper:**   
 - We use the learning rate decay with `decay factor = 0.9` and `step = 1 epoch`,    
 while the paper did not give the detailed parameters (or they didn't use it?).
@@ -37,7 +40,7 @@ pip install keras
 
 **Step 2. Clone this repository to local.**
 ```
-git clone https://github.com/XifengGuo/CapsNet-Keras.git capsnet-keras
+git clone https://github.com/cemanil/CapsNet-Keras.git
 cd capsnet-keras
 ```
 
@@ -45,12 +48,12 @@ cd capsnet-keras
 
 Training with default settings:
 ```
-python capsulenet.py
+python train_capsnet.py
 ```
 
 More detailed usage run for help:
 ```
-python capsulenet.py -h
+python train_capsnet.py -h
 ```
 
 **Step 4. Test a pre-trained CapsNet model**
@@ -58,7 +61,7 @@ python capsulenet.py -h
 Suppose you have trained a model using the above command, then the trained model will be
 saved to `result/trained_model.h5`. Now just launch the following command to get test results.
 ```
-$ python capsulenet.py -t -w result/trained_model.h5
+$ python train_capsnet.py -t -w result/trained_model.h5
 ```
 It will output the testing accuracy and show the reconstructed images.
 The testing data is same as the validation data. It will be easy to test on new data, 
@@ -84,10 +87,10 @@ But during training, no validation accuracy is reported.
 CapsNet classification test **error** on MNIST. Average and standard deviation results are
 reported by 3 trials. The results can be reproduced by launching the following commands.   
  ```
- python capsulenet.py --routings 1 --lam_recon 0.0    #CapsNet-v1   
- python capsulenet.py --routings 1 --lam_recon 0.392  #CapsNet-v2
- python capsulenet.py --routings 3 --lam_recon 0.0    #CapsNet-v3 
- python capsulenet.py --routings 3 --lam_recon 0.392  #CapsNet-v4
+ python train_capsnet.py --routings 1 --lam_recon 0.0    #CapsNet-v1
+ python train_capsnet.py --routings 1 --lam_recon 0.392  #CapsNet-v2
+ python train_capsnet.py --routings 3 --lam_recon 0.0    #CapsNet-v3
+ python train_capsnet.py --routings 3 --lam_recon 0.392  #CapsNet-v4
 ```
    Method     |   Routing   |   Reconstruction  |  MNIST (%)  |  *Paper*    
    :---------|:------:|:---:|:----:|:----:
@@ -111,7 +114,7 @@ About `55s / epoch` on two GTX 1080Ti GPU by using `capsulenet-multi-gpu.py`.
 
 The result of CapsNet-v4 by launching   
 ```
-python capsulenet.py -t -w result/trained_model.h5
+python train_capsnet.py -t -w result/trained_model.h5
 ```
 Digits at top 5 rows are real images from MNIST and 
 digits at bottom are corresponding reconstructed images.
@@ -121,7 +124,7 @@ digits at bottom are corresponding reconstructed images.
 #### Manipulate latent code
 
 ```
-python capsulenet.py -t --digit 5 -w result/trained_model.h5 
+python train_capsnet.py -t --digit 5 -w result/trained_model.h5
 ```
 For each digit, the *i*th row corresponds to the *i*th dimension of the capsule, and columns from left to 
 right correspond to adding `[-0.25, -0.2, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.2, 0.25]` to 

@@ -4,10 +4,10 @@ The current version maybe only works for TensorFlow backend. Actually it will be
 Adopting to other backends should be easy, but I have not tested this.
 
 Usage:
-       python capsulenet-multi-gpu.py
-       python capsulenet-multi-gpu.py --epochs 50
-       python capsulenet-multi-gpu.py --epochs 50 --routings 3
-       python capsulenet-multi-gpu.py --gpus 2
+       python train_capsnet.py
+       python train_capsnet.py --epochs 50
+       python train_capsnet.py --epochs 50 --routings 3
+       python train_capsnet.py --gpus 2
        ... ...
 
 Result:
