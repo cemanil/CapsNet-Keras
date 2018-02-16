@@ -18,17 +18,17 @@ Author: Xifeng Guo, E-mail: `guoxifeng1990@163.com`, Github: `https://github.com
 
 import numpy as np
 from keras import layers, models, optimizers
-from keras import backend as K
+from keras import backend as kb
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 from utils import combine_images
 from PIL import Image
-from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
+from capsulelayers import CapsuleLayer, primary_cap, Length, Mask
 
-K.set_image_data_format('channels_last')
+kb.set_image_data_format('channels_last')
 
 
-def CapsNet(input_shape, n_class, routings):
+def caps_net(input_shape, n_class, routings):
     """
     A Capsule Network on MNIST.
     :param input_shape: data shape, 3d, [width, height, channels]
@@ -39,11 +39,11 @@ def CapsNet(input_shape, n_class, routings):
     """
     x = layers.Input(shape=input_shape)
 
-    # Layer 1: Just a conventional Conv2D layer
+    # Layer 1: Just a conventional Conv2D layer.
     conv1 = layers.Conv2D(filters=256, kernel_size=9, strides=1, padding='valid', activation='relu', name='conv1')(x)
 
-    # Layer 2: Conv2D layer with `squash` activation, then reshape to [None, num_capsule, dim_capsule]
-    primarycaps = PrimaryCap(conv1, dim_capsule=8, n_channels=32, kernel_size=9, strides=2, padding='valid')
+    # Layer 2: Conv2D layer with `squash` activation, then reshape to [None, num_capsule, dim_capsule].
+    primarycaps = primary_cap(conv1, dim_capsule=8, n_channels=32, kernel_size=9, strides=2, padding='valid')
 
     # Layer 3: Capsule layer. Routing algorithm works here.
     digitcaps = CapsuleLayer(num_capsule=n_class, dim_capsule=16, routings=routings,
@@ -55,21 +55,21 @@ def CapsNet(input_shape, n_class, routings):
 
     # Decoder network.
     y = layers.Input(shape=(n_class,))
-    masked_by_y = Mask()([digitcaps, y])  # The true label is used to mask the output of capsule layer. For training
-    masked = Mask()(digitcaps)  # Mask using the capsule with maximal length. For prediction
+    masked_by_y = Mask()([digitcaps, y])  # The true label is used to mask the output of capsule layer. For training.
+    masked = Mask()(digitcaps)  # Mask using the capsule with maximal length. For prediction.
 
     # Shared Decoder model in training and prediction
     decoder = models.Sequential(name='decoder')
-    decoder.add(layers.Dense(512, activation='relu', input_dim=16*n_class))
+    decoder.add(layers.Dense(512, activation='relu', input_dim=16 * n_class))
     decoder.add(layers.Dense(1024, activation='relu'))
     decoder.add(layers.Dense(np.prod(input_shape), activation='sigmoid'))
     decoder.add(layers.Reshape(target_shape=input_shape, name='out_recon'))
 
-    # Models for training and evaluation (prediction)
+    # Models for training and evaluation (prediction).
     train_model = models.Model([x, y], [out_caps, decoder(masked_by_y)])
     eval_model = models.Model(x, [out_caps, decoder(masked)])
 
-    # manipulate model
+    # Model for manipulating units in digitcaps.
     noise = layers.Input(shape=(n_class, 16))
     noised_digitcaps = layers.Add()([digitcaps, noise])
     masked_noised_y = Mask()([noised_digitcaps, y])
@@ -84,10 +84,10 @@ def margin_loss(y_true, y_pred):
     :param y_pred: [None, num_capsule]
     :return: a scalar loss value.
     """
-    L = y_true * K.square(K.maximum(0., 0.9 - y_pred)) + \
-        0.5 * (1 - y_true) * K.square(K.maximum(0., y_pred - 0.1))
+    loss = (y_true * kb.square(kb.maximum(0., 0.9 - y_pred)) +
+            0.5 * (1 - y_true) * kb.square(kb.maximum(0., y_pred - 0.1)))
 
-    return K.mean(K.sum(L, 1))
+    return kb.mean(kb.sum(loss, 1))
 
 
 def train(model, data, args):
@@ -98,10 +98,10 @@ def train(model, data, args):
     :param args: arguments
     :return: The trained model
     """
-    # unpacking the data
+    # Unpacking the data.
     (x_train, y_train), (x_test, y_test) = data
 
-    # callbacks
+    # Callbacks.
     log = callbacks.CSVLogger(args.save_dir + '/log.csv')
     tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
                                batch_size=args.batch_size, histogram_freq=int(args.debug))
@@ -109,7 +109,7 @@ def train(model, data, args):
                                            save_best_only=True, save_weights_only=True, verbose=1)
     lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (args.lr_decay ** epoch))
 
-    # compile the model
+    # Compile the model.
     model.compile(optimizer=optimizers.Adam(lr=args.lr),
                   loss=[margin_loss, 'mse'],
                   loss_weights=[1., args.lam_recon],
@@ -150,10 +150,12 @@ def train(model, data, args):
 def test(model, data, args):
     x_test, y_test = data
     y_pred, x_recon = model.predict(x_test, batch_size=100)
-    print('-'*30 + 'Begin: test' + '-'*30)
-    print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/y_test.shape[0])
+    print('-' * 30 + 'Begin: test' + '-' * 30)
+    print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1)) / y_test.shape[0])
 
-    img = combine_images(np.concatenate([x_test[:50],x_recon[:50]]))
+    img = combine_images(np.concatenate([x_test[:50], x_recon[:50]]))
+    assert isinstance(img, np.ndarray)
+
     image = img * 255
     Image.fromarray(image.astype(np.uint8)).save(args.save_dir + "/real_and_recon.png")
     print()
@@ -164,7 +166,7 @@ def test(model, data, args):
 
 
 def manipulate_latent(model, data, args):
-    print('-'*30 + 'Begin: manipulate' + '-'*30)
+    print('-' * 30 + 'Begin: manipulate' + '-' * 30)
     x_test, y_test = data
     index = np.argmax(y_test, 1) == args.digit
     number = np.random.randint(low=0, high=sum(index) - 1)
@@ -175,21 +177,23 @@ def manipulate_latent(model, data, args):
     for dim in range(16):
         for r in [-0.25, -0.2, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.2, 0.25]:
             tmp = np.copy(noise)
-            tmp[:,:,dim] = r
+            tmp[:, :, dim] = r
             x_recon = model.predict([x, y, tmp])
             x_recons.append(x_recon)
 
     x_recons = np.concatenate(x_recons)
 
     img = combine_images(x_recons, height=16)
-    image = img*255
+    assert isinstance(img, np.ndarray)
+
+    image = img * 255
     Image.fromarray(image.astype(np.uint8)).save(args.save_dir + '/manipulate-%d.png' % args.digit)
     print('manipulated result saved to %s/manipulate-%d.png' % (args.save_dir, args.digit))
     print('-' * 30 + 'End: manipulate' + '-' * 30)
 
 
 def load_mnist():
-    # the data, shuffled and split between train and test sets
+    # The data, shuffled and split between train and test sets.
     from keras.datasets import mnist
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -206,51 +210,51 @@ if __name__ == "__main__":
     from keras.preprocessing.image import ImageDataGenerator
     from keras import callbacks
 
-    # setting the hyper parameters
-    parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
-    parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--batch_size', default=100, type=int)
-    parser.add_argument('--lr', default=0.001, type=float,
+    # Setting the hyper parameters.
+    Parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
+    Parser.add_argument('--epochs', default=50, type=int)
+    Parser.add_argument('--batch_size', default=100, type=int)
+    Parser.add_argument('--lr', default=0.001, type=float,
                         help="Initial learning rate")
-    parser.add_argument('--lr_decay', default=0.9, type=float,
+    Parser.add_argument('--lr_decay', default=0.9, type=float,
                         help="The value multiplied by lr at each epoch. Set a larger value for larger epochs")
-    parser.add_argument('--lam_recon', default=0.392, type=float,
+    Parser.add_argument('--lam_recon', default=0.392, type=float,
                         help="The coefficient for the loss of decoder")
-    parser.add_argument('-r', '--routings', default=3, type=int,
+    Parser.add_argument('-r', '--routings', default=3, type=int,
                         help="Number of iterations used in routing algorithm. should > 0")
-    parser.add_argument('--shift_fraction', default=0.1, type=float,
+    Parser.add_argument('--shift_fraction', default=0.1, type=float,
                         help="Fraction of pixels to shift at most in each direction.")
-    parser.add_argument('--debug', action='store_true',
+    Parser.add_argument('--debug', action='store_true',
                         help="Save weights by TensorBoard")
-    parser.add_argument('--save_dir', default='./result')
-    parser.add_argument('-t', '--testing', action='store_true',
+    Parser.add_argument('--save_dir', default='./result')
+    Parser.add_argument('-t', '--testing', action='store_true',
                         help="Test the trained model on testing dataset")
-    parser.add_argument('--digit', default=5, type=int,
+    Parser.add_argument('--digit', default=5, type=int,
                         help="Digit to manipulate")
-    parser.add_argument('-w', '--weights', default=None,
+    Parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
-    args = parser.parse_args()
-    print(args)
+    Args = Parser.parse_args()
+    print(Args)
 
-    if not os.path.exists(args.save_dir):
-        os.makedirs(args.save_dir)
+    if not os.path.exists(Args.save_dir):
+        os.makedirs(Args.save_dir)
 
-    # load data
-    (x_train, y_train), (x_test, y_test) = load_mnist()
+    # Load data.
+    (XTrain, YTrain), (XTest, YTest) = load_mnist()
 
-    # define model
-    model, eval_model, manipulate_model = CapsNet(input_shape=x_train.shape[1:],
-                                                  n_class=len(np.unique(np.argmax(y_train, 1))),
-                                                  routings=args.routings)
-    model.summary()
+    # Define model.
+    Model, EvalModel, ManipulateModel = caps_net(input_shape=XTrain.shape[1:],
+                                                 n_class=len(np.unique(np.argmax(YTrain, 1))),
+                                                 routings=Args.routings)
+    Model.summary()
 
-    # train or test
-    if args.weights is not None:  # init the model weights with provided one
-        model.load_weights(args.weights)
-    if not args.testing:
-        train(model=model, data=((x_train, y_train), (x_test, y_test)), args=args)
-    else:  # as long as weights are given, will run testing
-        if args.weights is None:
+    # Train or test.
+    if Args.weights is not None:  # Init the model weights with provided one.
+        Model.load_weights(Args.weights)
+    if not Args.testing:
+        train(model=Model, data=((XTrain, YTrain), (XTest, YTest)), args=Args)
+    else:  # As long as weights are given, will run testing.
+        if Args.weights is None:
             print('No weights are provided. Will test using random initialized weights.')
-        manipulate_latent(manipulate_model, (x_test, y_test), args)
-        test(model=eval_model, data=(x_test, y_test), args=args)
+        manipulate_latent(ManipulateModel, (XTest, YTest), Args)
+        test(model=EvalModel, data=(XTest, YTest), args=Args)

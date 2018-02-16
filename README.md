@@ -143,6 +143,11 @@ independent during reconstruction.
 ![](result/manipulate-8.png)
 ![](result/manipulate-9.png)
 
+## Style
+This project follows PEP8 style guide.
+Additionally,
+- Use PascalCase for the variables in main()
+- Start comments with a capital letter, and end with a full stop.
 
 ## Other Implementations
 

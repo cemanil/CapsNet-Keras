@@ -3,14 +3,15 @@ from matplotlib import pyplot as plt
 import csv
 import math
 
+
 def plot_log(filename, show=True):
-    # load data
+    # Load data.
     keys = []
     values = []
     with open(filename, 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if keys == []:
+            if len(keys) is 0:
                 for key, value in row.items():
                     keys.append(key)
                     values.append(float(value))
@@ -20,9 +21,9 @@ def plot_log(filename, show=True):
                 values.append(float(value))
 
         values = np.reshape(values, newshape=(-1, len(keys)))
-        values[:,0] += 1
+        values[:, 0] += 1
 
-    fig = plt.figure(figsize=(4,6))
+    fig = plt.figure(figsize=(4, 6))
     fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95)
     fig.add_subplot(211)
     for i, key in enumerate(keys):
@@ -63,8 +64,5 @@ def combine_images(generated_images, height=None, width=None):
             img[:, :, 0]
     return image
 
-if __name__=="__main__":
+if __name__ == "__main__":
     plot_log('result/log.csv')
-
-
-
