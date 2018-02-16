@@ -27,14 +27,14 @@ def plot_log(filename, show=True):
     fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95)
     fig.add_subplot(211)
     for i, key in enumerate(keys):
-        if key.find('loss') >= 0 and not key.find('val') >= 0:  # training loss
+        if key.find('loss') >= 0 and not key.find('val') >= 0:  # Training loss.
             plt.plot(values[:, 0], values[:, i], label=key)
     plt.legend()
     plt.title('Training loss')
 
     fig.add_subplot(212)
     for i, key in enumerate(keys):
-        if key.find('acc') >= 0:  # acc
+        if key.find('acc') >= 0:  # Acc.
             plt.plot(values[:, 0], values[:, i], label=key)
     plt.legend()
     plt.title('Training and validation accuracy')
@@ -49,9 +49,9 @@ def combine_images(generated_images, height=None, width=None):
     if width is None and height is None:
         width = int(math.sqrt(num))
         height = int(math.ceil(float(num)/width))
-    elif width is not None and height is None:  # height not given
+    elif width is not None and height is None:  # Height not given.
         height = int(math.ceil(float(num)/width))
-    elif height is not None and width is None:  # width not given
+    elif height is not None and width is None:  # Width not given.
         width = int(math.ceil(float(num)/height))
 
     shape = generated_images.shape[1:3]
