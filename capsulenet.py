@@ -8,7 +8,7 @@ Usage:
        python capsulenet.py --epochs 50
        python capsulenet.py --epochs 50 --routings 3
        ... ...
-       
+
 Result:
     Validation accuracy > 99.5% after 20 epochs. Converge to 99.66% after 50 epochs.
     About 110 seconds per epoch on a single GTX1070 GPU card
