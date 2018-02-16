@@ -252,8 +252,10 @@ if __name__ == "__main__":
     # Train or test.
     if Args.weights is not None:  # Init the model weights with provided one.
         Model.load_weights(Args.weights)
+
     if not Args.testing:
         train(model=Model, data=((XTrain, YTrain), (XTest, YTest)), args=Args)
+
     else:  # As long as weights are given, will run testing.
         if Args.weights is None:
             print('No weights are provided. Will test using random initialized weights.')
