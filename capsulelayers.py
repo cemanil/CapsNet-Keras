@@ -60,9 +60,9 @@ class Mask(layers.Layer):
         return masked
 
     def compute_output_shape(self, input_shape):
-        if type(input_shape[0]) is tuple:  # true label provided
+        if type(input_shape[0]) is tuple:  # True label provided.
             return tuple([None, input_shape[0][1] * input_shape[0][2]])
-        else:  # no true label provided
+        else:  # No true label provided.
             return tuple([None, input_shape[1] * input_shape[2]])
 
 
