@@ -68,11 +68,11 @@ def main():
         training_callbacks = [log, tb, checkpoint, lr_decay]
 
         if Args.gpus < 2:  # If cpu or single GPU training.
-            train(model=Model, data_generator=mnist_loader, args=Args, callbacks=training_callbacks)
+            train(model=Model, data_generator=mnist_loader, args=Args, training_callbacks=training_callbacks)
         else:
             # Define multi-gpu model.
             MultiModel = multi_gpu_model(Model, gpus=Args.gpus)
-            train(model=MultiModel, data_generator=mnist_loader, args=Args, callbacks=training_callbacks)
+            train(model=MultiModel, data_generator=mnist_loader, args=Args, training_callbacks=training_callbacks)
 
             # Save weights.
             Model.save_weights(Args.save_dir + '/trained_model.h5')
