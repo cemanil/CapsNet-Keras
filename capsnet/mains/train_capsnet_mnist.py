@@ -14,28 +14,28 @@ from capsnet.utils.config import process_config, merge_configs
 
 def main():
     # Setting the hyper parameters.
-    Parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
-    Parser.add_argument('--config_path', default='../configs/default_mnist.json',
+    parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
+    parser.add_argument('--config_path', default='../configs/default_mnist.json',
                         help="Path of the .json file that contains the hyperparameters of the network. ")
-    Parser.add_argument('--debug', default=0, type=int,
+    parser.add_argument('--debug', default=0, type=int,
                         help="Save weights by TensorBoard")
-    Parser.add_argument('--save_dir', default='./result')
-    Parser.add_argument('-t', '--testing', action='store_true',
+    parser.add_argument('--save_dir', default='./result')
+    parser.add_argument('-t', '--testing', action='store_true',
                         help="Test the trained model on testing dataset")
-    Parser.add_argument('--digit', default=5, type=int,
+    parser.add_argument('--digit', default=5, type=int,
                         help="Digit to manipulate")
-    Parser.add_argument('-w', '--weights', default=None,
+    parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
-    Parser.add_argument('--gpus', default=1, type=int)
+    parser.add_argument('--gpus', default=1, type=int)
 
-    Args = Parser.parse_args()
-    if not os.path.exists(Args.save_dir):
-        os.makedirs(Args.save_dir)
+    args = parser.parse_args()
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
 
     # Get hyperparameters from config json and merge them with the Arguments namespace.
-    hparams = process_config(Args.config_path)
-    Args = merge_configs(dict(hparams), vars(Args))
-    print(Args)
+    hparams = process_config(args.config_path)
+    args = merge_configs(dict(hparams), vars(args))
+    print(args)
 
     # Load data.
     mnist_loader = MnistLoader()
@@ -43,45 +43,45 @@ def main():
 
     # Define model.
     with tf.device('/cpu:0'):
-        Model, EvalModel, ManipulateModel = caps_net(input_shape=XTrain.shape[1:],
-                                                     n_class=len(np.unique(np.argmax(YTrain, 1))),
-                                                     routings=Args.routings)
-    Model.summary()
+        model, eval_model, manipulate_model = caps_net(input_shape=XTrain.shape[1:],
+                                                       n_class=len(np.unique(np.argmax(YTrain, 1))),
+                                                       routings=args.routings)
+    model.summary()
     # plot_model(Model, to_file=Args.save_dir + '/model.png', show_shapes=True)  # TODO: UNCOMMENT THIS.
 
     # Train or test.
-    if Args.weights is not None:  # Init the model weights with provided one.
-        Model.load_weights(Args.weights)
+    if args.weights is not None:  # Init the model weights with provided one.
+        model.load_weights(args.weights)
 
-    if not Args.testing:
+    if not args.testing:
         # Callbacks.
-        log = callbacks.CSVLogger(Args.save_dir + '/log.csv')
-        tb = callbacks.TensorBoard(log_dir=Args.save_dir + '/tensorboard-logs',
-                                   batch_size=Args.batch_size, histogram_freq=Args.debug)
-        checkpoint = callbacks.ModelCheckpoint(Args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
+        log = callbacks.CSVLogger(args.save_dir + '/log.csv')
+        tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
+                                   batch_size=args.batch_size, histogram_freq=args.debug)
+        checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
                                                save_best_only=True, save_weights_only=True, verbose=1)
-        lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: Args.learning_rate * (Args.lr_decay ** epoch))
+        lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.learning_rate * (args.lr_decay ** epoch))
         training_callbacks = [log, tb, checkpoint, lr_decay]
 
-        if Args.gpus < 2:  # If cpu or single GPU training.
-            train(model=Model, data_generator=mnist_loader, args=Args, training_callbacks=training_callbacks)
+        if args.gpus < 2:  # If cpu or single GPU training.
+            train(model=model, data_generator=mnist_loader, args=args, training_callbacks=training_callbacks)
         else:
             # Define multi-gpu model.
-            MultiModel = multi_gpu_model(Model, gpus=Args.gpus)
-            train(model=MultiModel, data_generator=mnist_loader, args=Args, training_callbacks=training_callbacks)
+            multi_model = multi_gpu_model(model, gpus=args.gpus)
+            train(model=multi_model, data_generator=mnist_loader, args=args, training_callbacks=training_callbacks)
 
             # Save weights.
-            Model.save_weights(Args.save_dir + '/trained_model.h5')
-            print('Trained model saved to \'%s/trained_model.h5\'' % Args.save_dir)
+            model.save_weights(args.save_dir + '/trained_model.h5')
+            print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
             # Test the model.
-            test(model=EvalModel, data=(XTest, YTest), args=Args)
+            test(model=eval_model, data=(XTest, YTest), args=args)
 
     else:  # As long as weights are given, will run testing.
-        if Args.weights is None:
+        if args.weights is None:
             print('No weights are provided. Will test using random initialized weights.')
-        manipulate_latent(ManipulateModel, (XTest, YTest), Args)
-        test(model=EvalModel, data=(XTest, YTest), args=Args)
+        manipulate_latent(manipulate_model, (XTest, YTest), args)
+        test(model=eval_model, data=(XTest, YTest), args=args)
 
 
 if __name__ == "__main__":
