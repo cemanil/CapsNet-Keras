@@ -21,14 +21,8 @@ class MnistLoader(object):
         return (x_train, y_train), (x_test, y_test)
 
     def train_generator(self, batch_size, shift_fraction=0.):
-        """
-        # Training without data augmentation:
-        model.fit([x_train, y_train], [y_train, x_train], batch_size=args.batch_size, epochs=args.epochs,
-                  validation_data=[[x_test, y_test], [y_test, x_test]], callbacks=[log, tb, checkpoint, lr_decay])
-        """
-
         train_datagen = ImageDataGenerator(width_shift_range=shift_fraction,
-                                           height_shift_range=shift_fraction)  # shift up to 2 pixel for MNIST.
+                                           height_shift_range=shift_fraction)  # Shift up to 2 pixel for MNIST.
         generator = train_datagen.flow(self.x_train, self.y_train, batch_size=batch_size)
         while 1:
             x_batch, y_batch = generator.next()
