@@ -1,28 +1,19 @@
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from keras import callbacks
 from keras import optimizers
-from capsnet.utils.utils import margin_loss
-from capsnet.utils.utils import combine_images
+from capsnet.utils.utils import margin_loss, combine_images, plot_log
 
 
-def train(model, data_generator, args):
+def train(model, data_generator, args, training_callbacks):
     """
     Training a CapsuleNet
     :param model: the CapsuleNet model
     :param data_generator: a class whose static methods are generators for training and validation data.
     :param args: arguments
+    :param training_callbacks: a list of keras callbacks.
     :return: The trained model
     """
-    # Callbacks.
-    log = callbacks.CSVLogger(args.save_dir + '/log.csv')
-    tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
-                               batch_size=args.batch_size, histogram_freq=args.debug)
-    checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
-                                           save_best_only=True, save_weights_only=True, verbose=1)
-    lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (args.lr_decay ** epoch))
-
     # Compile the model.
     model.compile(optimizer=optimizers.Adam(lr=args.lr),
                   loss=[margin_loss, 'mse'],
@@ -30,17 +21,16 @@ def train(model, data_generator, args):
                   metrics={'capsnet': 'accuracy'})
 
     # Training with data augmentation. If shift_fraction=0., also no augmentation.
-    model.fit_generator(generator=data_generator.train_generator(args.batch_size, shift_fraction=0.),  # TODO: RMV HCDG.
+    model.fit_generator(generator=data_generator.train_generator(args.batch_size, shift_fraction=args.shift_fraction),
                         steps_per_epoch=100,  # int(y_train.shape[0] / args.batch_size)# TODO: REMOVE HARD CODING.
                         epochs=args.epochs,
                         validation_data=data_generator.valid_generator(),  # TODO: MAKE THIS FN A GENERATOR.
                         validation_steps=1,  # TODO: REMOVE HARD CODING.
-                        callbacks=[log, tb, checkpoint, lr_decay])
+                        callbacks=training_callbacks)
 
     model.save_weights(args.save_dir + '/trained_model.h5')
     print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
-    from utils import plot_log
     plot_log(args.save_dir + '/log.csv', show=True)
 
     return model

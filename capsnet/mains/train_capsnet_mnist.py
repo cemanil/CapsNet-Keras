@@ -4,11 +4,11 @@ import numpy as np
 import tensorflow as tf
 from keras.utils.vis_utils import plot_model
 from keras.utils import multi_gpu_model
+from keras import callbacks
 
 from capsnet.data_loaders.mnist import MnistLoader
 from capsnet.models.capsnet import caps_net
 from capsnet.trainers.capsnet_trainer import train, test, manipulate_latent
-from capsnet.utils.utils import plot_log  # TODO: Understand why this is unused.
 
 
 def main():
@@ -58,12 +58,21 @@ def main():
         Model.load_weights(Args.weights)
 
     if not Args.testing:
+        # Callbacks.
+        log = callbacks.CSVLogger(Args.save_dir + '/log.csv')
+        tb = callbacks.TensorBoard(log_dir=Args.save_dir + '/tensorboard-logs',
+                                   batch_size=Args.batch_size, histogram_freq=Args.debug)
+        checkpoint = callbacks.ModelCheckpoint(Args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
+                                               save_best_only=True, save_weights_only=True, verbose=1)
+        lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: Args.lr * (Args.lr_decay ** epoch))
+        training_callbacks = [log, tb, checkpoint, lr_decay]
+
         if Args.gpus < 2:  # If cpu or single GPU training.
-            train(model=Model, data_generator=mnist_loader, args=Args)
+            train(model=Model, data_generator=mnist_loader, args=Args, callbacks=training_callbacks)
         else:
             # Define multi-gpu model.
             MultiModel = multi_gpu_model(Model, gpus=Args.gpus)
-            train(model=MultiModel, data_generator=mnist_loader, args=Args)
+            train(model=MultiModel, data_generator=mnist_loader, args=Args, callbacks=training_callbacks)
 
             # Save weights.
             Model.save_weights(Args.save_dir + '/trained_model.h5')
