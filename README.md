@@ -40,20 +40,25 @@ pip install keras
 
 **Step 2. Clone this repository to local.**
 ```
-git clone https://github.com/cemanil/CapsNet-Keras.git
+git clone https://github.com/cemanil/CapsNet-Keras.git capsnet-keras
 cd capsnet-keras
+```
+
+**Step 2.5 Add capsnet-keras to your PYTHONPATH. This can be done by adding the following line in .bashrc:
+```
+export PYTHONPATH=/u/anilcem/Workspace/capsnet-keras:$PYTHONPATH
 ```
 
 **Step 3. Train a CapsNet on MNIST**  
 
-Training with default settings:
+Training with default settings - from capsnet-keras root:
 ```
-python train_capsnet.py
+python ./capsnet/mains/train_capsnet_mnist.py
 ```
 
 More detailed usage run for help:
 ```
-python train_capsnet.py -h
+python ./capsnet/mains/train_capsnet_mnist.py -h
 ```
 
 **Step 4. Test a pre-trained CapsNet model**
@@ -61,7 +66,7 @@ python train_capsnet.py -h
 Suppose you have trained a model using the above command, then the trained model will be
 saved to `result/trained_model.h5`. Now just launch the following command to get test results.
 ```
-$ python train_capsnet.py -t -w result/trained_model.h5
+$ python ./capsnet/mains/train_capsnet_mnist.py -t -w result/trained_model.h5
 ```
 It will output the testing accuracy and show the reconstructed images.
 The testing data is same as the validation data. It will be easy to test on new data, 
@@ -75,7 +80,7 @@ https://pan.baidu.com/s/1sldqQo1
 
 This requires `Keras>=2.0.9`. After updating Keras:   
 ```
-python capsulenet-multi-gpu.py --gpus 2
+python ./capsnet/mains/train_capsnet_mnist.py --gpus 2
 ```
 It will automatically train on multi gpus for 50 epochs and then output the performance on test dataset.
 But during training, no validation accuracy is reported.
@@ -87,10 +92,10 @@ But during training, no validation accuracy is reported.
 CapsNet classification test **error** on MNIST. Average and standard deviation results are
 reported by 3 trials. The results can be reproduced by launching the following commands.   
  ```
- python train_capsnet.py --routings 1 --lam_recon 0.0    #CapsNet-v1
- python train_capsnet.py --routings 1 --lam_recon 0.392  #CapsNet-v2
- python train_capsnet.py --routings 3 --lam_recon 0.0    #CapsNet-v3
- python train_capsnet.py --routings 3 --lam_recon 0.392  #CapsNet-v4
+ python ./capsnet/mains/train_capsnet_mnist.py --routings 1 --lam_recon 0.0    #CapsNet-v1
+ python ./capsnet/mains/train_capsnet_mnist.py --routings 1 --lam_recon 0.392  #CapsNet-v2
+ python ./capsnet/mains/train_capsnet_mnist.py --routings 3 --lam_recon 0.0    #CapsNet-v3
+ python ./capsnet/mains/train_capsnet_mnist.py --routings 3 --lam_recon 0.392  #CapsNet-v4
 ```
    Method     |   Routing   |   Reconstruction  |  MNIST (%)  |  *Paper*    
    :---------|:------:|:---:|:----:|:----:
@@ -114,7 +119,7 @@ About `55s / epoch` on two GTX 1080Ti GPU by using `capsulenet-multi-gpu.py`.
 
 The result of CapsNet-v4 by launching   
 ```
-python train_capsnet.py -t -w result/trained_model.h5
+python ./capsnet/mains/train_capsnet_mnist.py -t -w result/trained_model.h5
 ```
 Digits at top 5 rows are real images from MNIST and 
 digits at bottom are corresponding reconstructed images.
@@ -124,7 +129,7 @@ digits at bottom are corresponding reconstructed images.
 #### Manipulate latent code
 
 ```
-python train_capsnet.py -t --digit 5 -w result/trained_model.h5
+python ./capsnet/mains/train_capsnet_mnist.py -t --digit 5 -w result/trained_model.h5
 ```
 For each digit, the *i*th row corresponds to the *i*th dimension of the capsule, and columns from left to 
 right correspond to adding `[-0.25, -0.2, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.2, 0.25]` to 
@@ -149,7 +154,7 @@ independent during reconstruction.
 ## Style
 This project follows PEP8 style guide.
 Additionally,
-- Use PascalCase for the variables in main()
+- Use PascalCase for the variables in main().
 - Start comments with a capital letter, and end with a full stop.
 
 ## Other Implementations
