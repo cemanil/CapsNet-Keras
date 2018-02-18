@@ -32,7 +32,7 @@ def main():
     if not os.path.exists(Args.save_dir):
         os.makedirs(Args.save_dir)
 
-    # Get hyperparameters and put them in the arguments namespace.
+    # Get hyperparameters from config json and merge them with the Arguments namespace.
     hparams = process_config(Args.config_path)
     Args = merge_configs(dict(hparams), vars(Args))
     print(Args)

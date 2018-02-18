@@ -1,3 +1,4 @@
+import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import to_categorical
 from itertools import cycle
@@ -38,6 +39,9 @@ class MnistLoader(object):
         return (self.x_train, self.y_train), (self.x_test, self.y_test)
 
     def _reshape_mnist(self):
+        assert isinstance(self.x_train, np.ndarray)
+        assert isinstance(self.x_test, np.ndarray)
+
         # Scale to [0,1].
         self.x_train = self.x_train.reshape(-1, 28, 28, 1).astype('float32') / 255.
         self.x_test = self.x_test.reshape(-1, 28, 28, 1).astype('float32') / 255.
