@@ -15,7 +15,7 @@ def train(model, data_generator, args, training_callbacks):
     :return: The trained model
     """
     # Compile the model.
-    model.compile(optimizer=optimizers.Adam(lr=args.lr),
+    model.compile(optimizer=optimizers.Adam(lr=args.learning_rate),
                   loss=[margin_loss, 'mse'],
                   loss_weights=[1., args.lam_recon],
                   metrics={'capsnet': 'accuracy'})

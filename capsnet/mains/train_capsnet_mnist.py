@@ -9,23 +9,14 @@ from keras import callbacks
 from capsnet.data_loaders.mnist import MnistLoader
 from capsnet.models.capsnet import caps_net
 from capsnet.trainers.capsnet_trainer import train, test, manipulate_latent
+from capsnet.utils.config import process_config, merge_configs
 
 
 def main():
     # Setting the hyper parameters.
     Parser = argparse.ArgumentParser(description="Capsule Network on MNIST.")
-    Parser.add_argument('--epochs', default=50, type=int)
-    Parser.add_argument('--batch_size', default=300, type=int)
-    Parser.add_argument('--lr', default=0.001, type=float,
-                        help="Initial learning rate")
-    Parser.add_argument('--lr_decay', default=0.9, type=float,
-                        help="The value multiplied by lr at each epoch. Set a larger value for larger epochs")
-    Parser.add_argument('--lam_recon', default=0.392, type=float,
-                        help="The coefficient for the loss of decoder")
-    Parser.add_argument('-r', '--routings', default=3, type=int,
-                        help="Number of iterations used in routing algorithm. should > 0")
-    Parser.add_argument('--shift_fraction', default=0.1, type=float,
-                        help="Fraction of pixels to shift at most in each direction.")
+    Parser.add_argument('--config_path', default='../configs/default_mnist.json',
+                        help="Path of the .json file that contains the hyperparameters of the network. ")
     Parser.add_argument('--debug', default=0, type=int,
                         help="Save weights by TensorBoard")
     Parser.add_argument('--save_dir', default='./result')
@@ -36,10 +27,15 @@ def main():
     Parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
     Parser.add_argument('--gpus', default=1, type=int)
+
     Args = Parser.parse_args()
-    print(Args)
     if not os.path.exists(Args.save_dir):
         os.makedirs(Args.save_dir)
+
+    # Get hyperparameters and put them in the arguments namespace.
+    hparams = process_config(Args.config_path)
+    Args = merge_configs(dict(hparams), vars(Args))
+    print(Args)
 
     # Load data.
     mnist_loader = MnistLoader()
@@ -64,7 +60,7 @@ def main():
                                    batch_size=Args.batch_size, histogram_freq=Args.debug)
         checkpoint = callbacks.ModelCheckpoint(Args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
                                                save_best_only=True, save_weights_only=True, verbose=1)
-        lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: Args.lr * (Args.lr_decay ** epoch))
+        lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: Args.learning_rate * (Args.lr_decay ** epoch))
         training_callbacks = [log, tb, checkpoint, lr_decay]
 
         if Args.gpus < 2:  # If cpu or single GPU training.

@@ -1,0 +1,10 @@
+{
+  "exp_name": "default_mnist",
+  "epochs": 50,
+  "batch_size": 300,
+  "learning_rate": 0.001,
+  "lr_decay": 0.9,
+  "lam_recon": 0.392,
+  "routings": 3,
+  "shift_fraction": 0.1
+}
