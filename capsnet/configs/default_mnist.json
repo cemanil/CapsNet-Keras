@@ -1,4 +1,11 @@
 {
+  "no_tr_ex": 50000,
+  "no_test_ex": 10000,
+  "im_width": 28,
+  "im_height": 28,
+  "im_chn": 1,
+  "output_cls": 10,
+
   "exp_name": "default_mnist",
   "epochs": 50,
   "batch_size": 300,

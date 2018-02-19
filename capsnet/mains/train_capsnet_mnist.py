@@ -38,7 +38,7 @@ def main():
     print(args)
 
     # Load data.
-    mnist_loader = MnistLoader()
+    mnist_loader = MnistLoader(args)
     (XTrain, YTrain), (XTest, YTest) = mnist_loader.get_mnist()
 
     # Define model.

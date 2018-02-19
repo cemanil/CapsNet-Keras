@@ -6,7 +6,10 @@ from itertools import cycle
 
 class MnistLoader(object):
 
-    def __init__(self):
+    def __init__(self, args):
+        # Obtain args.
+        self.args = args
+
         # Load MNIST data.
         (self.x_train, self.y_train), (self.x_test, self.y_test) = self.load_mnist()
 
@@ -23,7 +26,7 @@ class MnistLoader(object):
 
     def train_generator(self, batch_size, shift_fraction=0.):
         train_datagen = ImageDataGenerator(width_shift_range=shift_fraction,
-                                           height_shift_range=shift_fraction)  # Shift up to 2 pixel for MNIST.
+                                           height_shift_range=shift_fraction)  # Shift pixels of the image.
         generator = train_datagen.flow(self.x_train, self.y_train, batch_size=batch_size)
         while 1:
             x_batch, y_batch = generator.next()
@@ -43,8 +46,13 @@ class MnistLoader(object):
         assert isinstance(self.x_test, np.ndarray)
 
         # Scale to [0,1].
-        self.x_train = self.x_train.reshape(-1, 28, 28, 1).astype('float32') / 255.
-        self.x_test = self.x_test.reshape(-1, 28, 28, 1).astype('float32') / 255.
+        self.x_train = self.x_train.reshape(-1, self.args.im_width, self.args.im_height, self.args.im_chn)
+        self.x_train = self.x_train.astype('float32')
+        self.x_train = (self.x_train - self.x_train.min()) / (self.x_train.max() - self.x_train.min())
+
+        self.x_test = self.x_test.reshape(-1, self.args.im_width, self.args.im_height, self.args.im_chn)
+        self.x_test = self.x_test.astype('float32')
+        self.x_test = (self.x_test - self.x_test.min()) / (self.x_test.max() - self.x_test.min())
 
         # Cast to float32.
         self.y_train = to_categorical(self.y_train.astype('float32'))
