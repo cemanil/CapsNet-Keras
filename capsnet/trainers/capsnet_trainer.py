@@ -1,5 +1,7 @@
 import numpy as np
 from PIL import Image
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from keras import optimizers
 from capsnet.utils.utils import margin_loss, combine_images, plot_log
@@ -37,7 +39,7 @@ def train(model, data_generator, args, training_callbacks):
     return model
 
 
-def test(model, test_generator, args):
+def test(model, test_generator, args, plot=False):
     x_test, y_test = next(test_generator)
     y_pred, x_recon = model.predict(x_test, batch_size=100)
     print('-' * 30 + 'Begin: test' + '-' * 30)
@@ -51,8 +53,9 @@ def test(model, test_generator, args):
     print()
     print('Reconstructed images are saved to %s/real_and_recon.png' % args.save_dir)
     print('-' * 30 + 'End: test' + '-' * 30)
-    plt.imshow(plt.imread(args.save_dir + "/real_and_recon.png"))
-    plt.show()
+    if plot:
+        plt.imshow(plt.imread(args.save_dir + "/real_and_recon.png"))
+        plt.show()
 
 
 def manipulate_latent(model, test_generator, args):
