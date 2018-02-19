@@ -1,5 +1,7 @@
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
 import csv
 import math
 import keras.backend as kb
