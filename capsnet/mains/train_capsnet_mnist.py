@@ -62,24 +62,31 @@ def main():
         training_callbacks = [log, tb, checkpoint, lr_decay]
 
         if args.gpus < 2:  # If CPU or single GPU training.
+            print('Train the model. ')
             train(model=model, data_generator=mnist_loader, args=args, training_callbacks=training_callbacks)
         else:
             # Define multi-gpu model.
+            print('Train the model. ')
             multi_model = multi_gpu_model(model, gpus=args.gpus)
             train(model=multi_model, data_generator=mnist_loader, args=args, training_callbacks=training_callbacks)
 
-            # Save weights.
-            model.save_weights(args.save_dir + '/trained_model.h5')
-            print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
+        # Save weights.
+        print('Save weights. ')
+        model.save_weights(args.save_dir + '/trained_model.h5')
+        print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
-            # Test the model.
-            test(model=eval_model, test_generator=mnist_loader.valid_generator(batch_size=50), args=args)
+        # Test the model.
+        print('Test the model. ')
+        test(model=eval_model, test_generator=mnist_loader.valid_generator(batch_size=50), args=args)
 
     else:  # As long as weights are given, will run testing.
         if args.weights is None:
             print('No weights are provided. Will test using random initialized weights.')
+
+        print('Try manipulating the latent variables. ')
         manipulate_latent(manipulate_model, (XTest, YTest), args)
 
+        print('Test the model. ')
         test(model=eval_model, test_generator=mnist_loader.valid_generator(batch_size=50), args=args)
 
 
