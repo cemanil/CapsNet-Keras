@@ -55,13 +55,13 @@ def main():
         # Callbacks.
         log = callbacks.CSVLogger(args.save_dir + '/log.csv')
         tb = callbacks.TensorBoard(log_dir=args.save_dir + '/tensorboard-logs',
-                                   batch_size=args.batch_size, histogram_freq=args.debug)
+                                   batch_size=args.tr_batch_size, histogram_freq=args.debug)
         checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
                                                save_best_only=True, save_weights_only=True, verbose=1)
         lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.learning_rate * (args.lr_decay ** epoch))
         training_callbacks = [log, tb, checkpoint, lr_decay]
 
-        if args.gpus < 2:  # If cpu or single GPU training.
+        if args.gpus < 2:  # If CPU or single GPU training.
             train(model=model, data_generator=mnist_loader, args=args, training_callbacks=training_callbacks)
         else:
             # Define multi-gpu model.

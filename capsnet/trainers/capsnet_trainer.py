@@ -21,11 +21,12 @@ def train(model, data_generator, args, training_callbacks):
                   metrics={'capsnet': 'accuracy'})
 
     # Training with data augmentation. If shift_fraction=0., also no augmentation.
-    model.fit_generator(generator=data_generator.train_generator(args.batch_size, shift_fraction=args.shift_fraction),
-                        steps_per_epoch=100,  # int(y_train.shape[0] / args.batch_size)# TODO: REMOVE HARD CODING.
+    model.fit_generator(generator=data_generator.train_generator(args.tr_batch_size,
+                                                                 shift_fraction=args.shift_fraction),
+                        steps_per_epoch=args.no_tr_ex / args.tr_batch_size,
                         epochs=args.epochs,
-                        validation_data=data_generator.valid_generator(),  # TODO: MAKE THIS FN A GENERATOR.
-                        validation_steps=1,  # TODO: REMOVE HARD CODING.
+                        validation_data=data_generator.valid_generator(args.val_batch_size),
+                        validation_steps=args.no_test_ex / args.val_batch_size,
                         callbacks=training_callbacks)
 
     model.save_weights(args.save_dir + '/trained_model.h5')

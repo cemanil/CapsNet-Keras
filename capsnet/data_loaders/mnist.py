@@ -28,15 +28,16 @@ class MnistLoader(object):
         train_datagen = ImageDataGenerator(width_shift_range=shift_fraction,
                                            height_shift_range=shift_fraction)  # Shift pixels of the image.
         generator = train_datagen.flow(self.x_train, self.y_train, batch_size=batch_size)
-        while 1:
+        while True:
             x_batch, y_batch = generator.next()
             yield ([x_batch, y_batch], [y_batch, x_batch])
 
-    def valid_generator(self):
-        valid_set = [[self.x_test, self.y_test], [self.y_test, self.x_test]]
-        cycle_valid = cycle([valid_set])
-
-        return cycle_valid
+    def valid_generator(self, batch_size):
+        valid_datagen = ImageDataGenerator()
+        generator = valid_datagen.flow(self.x_test, self.y_test, batch_size=batch_size)
+        while True:
+            x_batch, y_batch = generator.next()
+            yield ([x_batch, y_batch], [y_batch, x_batch])
 
     def get_mnist(self):
         return (self.x_train, self.y_train), (self.x_test, self.y_test)
