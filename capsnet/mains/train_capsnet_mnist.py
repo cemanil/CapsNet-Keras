@@ -43,9 +43,7 @@ def main():
 
     # Define model.
     with tf.device('/cpu:0'):
-        model, eval_model, manipulate_model = caps_net(input_shape=XTrain.shape[1:],
-                                                       n_class=len(np.unique(np.argmax(YTrain, 1))),
-                                                       routings=args.routings)
+        model, eval_model, manipulate_model = caps_net(args=args)
     model.summary()
     # plot_model(Model, to_file=Args.save_dir + '/model.png', show_shapes=True)  # TODO: UNCOMMENT THIS.
 

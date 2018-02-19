@@ -1,4 +1,6 @@
 {
+  "exp_name": "default_mnist",
+
   "no_tr_ex": 50000,
   "no_test_ex": 10000,
   "im_width": 28,
@@ -6,7 +8,33 @@
   "im_chn": 1,
   "output_cls": 10,
 
-  "exp_name": "default_mnist",
+  "lyr_1_filters": 256,
+  "lyr_1_kernel_size": 9,
+  "lyr_1_strides" : 1,
+  "lyr_1_padding": "valid",
+  "lyr_1_activation": "relu",
+  "lyr_1_name": "conv1",
+
+  "pcaps_dim_capsule": 8,
+  "pcaps_n_channels": 32,
+  "pcaps_kernel_size": 9,
+  "pcaps_strides": 2,
+  "pcaps_padding": "valid",
+
+  "dcaps_dim_capsule": 16,
+  "dcaps_routings": 3,
+  "dcaps_name": "digitcaps",
+
+  "out_caps_name": "capsnet",
+
+  "dcdr_name": "decoder",
+  "dcdr_lyr_1_hdim": 512,
+  "dcdr_lyr_1_activation": "relu",
+  "dcdr_lyr_2_hdim": 1024,
+  "dcdr_lyr_2_activation": "relu",
+  "dcdr_lyr_3_activation": "sigmoid",
+  "dcdr_output_name": "out_recon",
+
   "epochs": 50,
   "batch_size": 300,
   "learning_rate": 0.001,
