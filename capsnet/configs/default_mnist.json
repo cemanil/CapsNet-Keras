@@ -35,7 +35,7 @@
   "dcdr_lyr_3_activation": "sigmoid",
   "dcdr_output_name": "out_recon",
 
-  "epochs": 50,
+  "epochs": 1,
   "tr_batch_size": 300,
   "val_batch_size": 10000,
   "learning_rate": 0.001,

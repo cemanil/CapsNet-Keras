@@ -73,13 +73,14 @@ def main():
             print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
             # Test the model.
-            test(model=eval_model, data=(XTest, YTest), args=args)
+            test(model=eval_model, test_generator=mnist_loader.valid_generator(batch_size=50), args=args)
 
     else:  # As long as weights are given, will run testing.
         if args.weights is None:
             print('No weights are provided. Will test using random initialized weights.')
         manipulate_latent(manipulate_model, (XTest, YTest), args)
-        test(model=eval_model, data=(XTest, YTest), args=args)
+
+        test(model=eval_model, test_generator=mnist_loader.valid_generator(batch_size=50), args=args)
 
 
 if __name__ == "__main__":

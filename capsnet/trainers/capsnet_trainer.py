@@ -37,8 +37,8 @@ def train(model, data_generator, args, training_callbacks):
     return model
 
 
-def test(model, data, args):
-    x_test, y_test = data
+def test(model, test_generator, args):
+    x_test, y_test = next(test_generator)
     y_pred, x_recon = model.predict(x_test, batch_size=100)
     print('-' * 30 + 'Begin: test' + '-' * 30)
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1)) / y_test.shape[0])
@@ -55,9 +55,9 @@ def test(model, data, args):
     plt.show()
 
 
-def manipulate_latent(model, data, args):
+def manipulate_latent(model, test_generator, args):
     print('-' * 30 + 'Begin: manipulate' + '-' * 30)
-    x_test, y_test = data
+    x_test, y_test = test_generator.next()
     index = np.argmax(y_test, 1) == args.digit
     number = np.random.randint(low=0, high=sum(index) - 1)
     x, y = x_test[index][number], y_test[index][number]
