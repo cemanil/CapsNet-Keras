@@ -18,7 +18,7 @@ def margin_loss(y_true, y_pred):
     return kb.mean(kb.sum(loss, 1))
 
 
-def plot_log(filename, show=True):
+def plot_log(filename, show=False):
     # Load data.
     keys = []
     values = []
