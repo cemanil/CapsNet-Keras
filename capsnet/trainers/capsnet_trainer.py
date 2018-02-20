@@ -60,7 +60,7 @@ def test(model, test_generator, args, max_ims=50, plot=False):
 
 def manipulate_latent(model, test_generator, args):
     print('-' * 30 + 'Begin: manipulate' + '-' * 30)
-    x_test, y_test = test_generator.next()
+    x_test, y_test = next(test_generator)
     index = np.argmax(y_test, 1) == args.digit
     number = np.random.randint(low=0, high=sum(index) - 1)
     x, y = x_test[index][number], y_test[index][number]
