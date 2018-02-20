@@ -32,6 +32,6 @@ def merge_configs(config1, config2):
 
 
 def _merge_two_dicts(x, y):
-    z = x.copy()  # start with x's keys and values
-    z.update(y)  # modifies z with y's keys and values & returns None
+    z = x.copy()  # Start with x's keys and values.
+    z.update(y)  # Modifies z with y's keys and values & returns None.
     return z

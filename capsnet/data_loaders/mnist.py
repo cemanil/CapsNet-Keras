@@ -23,7 +23,6 @@ class MnistLoader(object):
 
         return (x_train, y_train), (x_test, y_test)
 
-    # TODO: REDUCE TO ONLY 1 GENERATOR.
     def train_generator(self, batch_size, shift_fraction=0.):
         train_datagen = ImageDataGenerator(width_shift_range=shift_fraction,
                                            height_shift_range=shift_fraction)  # Shift pixels of the image.

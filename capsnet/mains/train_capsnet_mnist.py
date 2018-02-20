@@ -1,6 +1,5 @@
 import os
 import argparse
-import numpy as np
 import tensorflow as tf
 from keras.utils.vis_utils import plot_model
 from keras.utils import multi_gpu_model
@@ -19,7 +18,7 @@ def main():
                         help="Path of the .json file that contains the hyperparameters of the network. ")
     parser.add_argument('--debug', default=0, type=int,
                         help="Save weights by TensorBoard")
-    parser.add_argument('--save_dir', default='./result')
+    parser.add_argument('--save_dir', default='../result')
     parser.add_argument('-t', '--testing', action='store_true',
                         help="Test the trained model on testing dataset")
     parser.add_argument('--digit', default=5, type=int,
@@ -37,9 +36,8 @@ def main():
     args = merge_configs(dict(hparams), vars(args))
     print(args)
 
-    # Load data.
+    # Initialize data loader.
     mnist_loader = MnistLoader(args)
-    (XTrain, YTrain), (XTest, YTest) = mnist_loader.get_mnist()
 
     # Define model.
     with tf.device('/cpu:0'):

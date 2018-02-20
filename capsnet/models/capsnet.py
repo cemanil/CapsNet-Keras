@@ -20,7 +20,8 @@ def caps_net(args):
 
     # Layer 2: Conv2D layer with `squash` activation, then reshape to [None, num_capsule, dim_capsule].
     primarycaps = primary_cap(conv1, dim_capsule=args.pcaps_dim_capsule, n_channels=args.pcaps_n_channels,
-                              kernel_size=args.pcaps_kernel_size, strides=args.pcaps_strides, padding=args.pcaps_padding)
+                              kernel_size=args.pcaps_kernel_size, strides=args.pcaps_strides,
+                              padding=args.pcaps_padding)
 
     # Layer 3: Capsule layer. Routing algorithm works here.
     digitcaps = CapsuleLayer(num_capsule=args.output_cls, dim_capsule=args.dcaps_dim_capsule,
