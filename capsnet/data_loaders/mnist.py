@@ -1,7 +1,6 @@
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import to_categorical
-from itertools import cycle
 
 
 class MnistLoader(object):
@@ -24,6 +23,7 @@ class MnistLoader(object):
 
         return (x_train, y_train), (x_test, y_test)
 
+    # TODO: REDUCE TO ONLY 1 GENERATOR.
     def train_generator(self, batch_size, shift_fraction=0.):
         train_datagen = ImageDataGenerator(width_shift_range=shift_fraction,
                                            height_shift_range=shift_fraction)  # Shift pixels of the image.
@@ -33,6 +33,13 @@ class MnistLoader(object):
             yield ([x_batch, y_batch], [y_batch, x_batch])
 
     def valid_generator(self, batch_size):
+        valid_datagen = ImageDataGenerator()
+        generator = valid_datagen.flow(self.x_test, self.y_test, batch_size=batch_size)
+        while True:
+            x_batch, y_batch = generator.next()
+            yield ([x_batch, y_batch], [y_batch, x_batch])
+
+    def test_generator(self, batch_size):
         valid_datagen = ImageDataGenerator()
         generator = valid_datagen.flow(self.x_test, self.y_test, batch_size=batch_size)
         while True:
