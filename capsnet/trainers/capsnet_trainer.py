@@ -39,13 +39,13 @@ def train(model, data_generator, args, training_callbacks):
     return model
 
 
-def test(model, test_generator, args, plot=False):
+def test(model, test_generator, args, max_ims=50, plot=False):
     x_test, y_test = next(test_generator)
-    y_pred, x_recon = model.predict(x_test, batch_size=100)
+    y_pred, x_recon = model.predict(x_test, batch_size=args.val_batch_size)
     print('-' * 30 + 'Begin: test' + '-' * 30)
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1)) / y_test.shape[0])
 
-    img = combine_images(np.concatenate([x_test[:50], x_recon[:50]]))
+    img = combine_images(np.concatenate([x_test[:max_ims], x_recon[:max_ims]]))
     assert isinstance(img, np.ndarray)
 
     image = img * 255
@@ -65,9 +65,9 @@ def manipulate_latent(model, test_generator, args):
     number = np.random.randint(low=0, high=sum(index) - 1)
     x, y = x_test[index][number], y_test[index][number]
     x, y = np.expand_dims(x, 0), np.expand_dims(y, 0)
-    noise = np.zeros([1, 10, 16])
+    noise = np.zeros([1, args.output_cls, args.dcaps_dim_capsule])
     x_recons = []
-    for dim in range(16):
+    for dim in range(args.dcaps_dim_capsule):
         for r in [-0.25, -0.2, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.2, 0.25]:
             tmp = np.copy(noise)
             tmp[:, :, dim] = r
@@ -76,7 +76,7 @@ def manipulate_latent(model, test_generator, args):
 
     x_recons = np.concatenate(x_recons)
 
-    img = combine_images(x_recons, height=16)
+    img = combine_images(x_recons, height=args.dcaps_dim_capsule)
     assert isinstance(img, np.ndarray)
 
     image = img * 255
