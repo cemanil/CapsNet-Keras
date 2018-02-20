@@ -3,48 +3,32 @@
 
 A Keras implementation of CapsNet in the paper:   
 [Sara Sabour, Nicholas Frosst, Geoffrey E Hinton. Dynamic Routing Between Capsules. NIPS 2017](https://arxiv.org/abs/1710.09829)   
-The current `average test error = 0.34%` and `best test error = 0.30%`.   
 
-**Disclaimer**
-This repo has been initially authored by Xifeng Guo, and refactored by Cem Anil.
-
-**Differences with the paper:**   
-- We use the learning rate decay with `decay factor = 0.9` and `step = 1 epoch`,    
-while the paper did not give the detailed parameters (or they didn't use it?).
-- We only report the test errors after `50 epochs` training.   
-In the paper, I suppose they trained for `1250 epochs` according to Figure A.1?
-Sounds crazy, maybe I misunderstood.
-- We use MSE (mean squared error) as the reconstruction loss and 
-the coefficient for the loss is `lam_recon=0.0005*784=0.392`.   
-This should be **equivalent** with using SSE (sum squared error) and `lam_recon=0.0005` as in the paper.
-
-
-**TODO**
-- Conduct experiments on other datasets. 
-- Explore interesting characteristics of CapsuleNet.
-
-**Contacts**
-- Your contributions to the repo are always welcome. 
-Open an issue or contact me with E-mail `guoxifeng1990@163.com` or WeChat `wenlong-guo`.
-
+**Disclaimer:**
+This repo has been forked and refactored by Cem Anil - based on the original CapsNet implementation by Xifeng Guo.
 
 ## Usage
 
 **Step 1.
 Install [Keras>=2.0.7](https://github.com/fchollet/keras) 
 with [TensorFlow>=1.2](https://github.com/tensorflow/tensorflow) backend.**
+
 ```
 pip install tensorflow-gpu
 pip install keras
 ```
 
 **Step 2. Clone this repository to local.**
+
 ```
 git clone https://github.com/cemanil/CapsNet-Keras.git capsnet-keras
 cd capsnet-keras
 ```
 
-**Step 2.5 Add capsnet-keras to your PYTHONPATH. This can be done by adding the following line in .bashrc:
+**Step 2.5 Configuring PYTHONPATH**
+
+ Add capsnet-keras to your PYTHONPATH. This can be done by adding the following line in .bashrc:
+ 
 ```
 export PYTHONPATH=/u/anilcem/Workspace/capsnet-keras:$PYTHONPATH
 ```
@@ -52,11 +36,13 @@ export PYTHONPATH=/u/anilcem/Workspace/capsnet-keras:$PYTHONPATH
 **Step 3. Train a CapsNet on MNIST**  
 
 Training with default settings - from capsnet-keras root:
+
 ```
 python ./capsnet/mains/train_capsnet_mnist.py
 ```
 
 More detailed usage run for help:
+
 ```
 python ./capsnet/mains/train_capsnet_mnist.py -h
 ```
@@ -65,16 +51,12 @@ python ./capsnet/mains/train_capsnet_mnist.py -h
 
 Suppose you have trained a model using the above command, then the trained model will be
 saved to `result/trained_model.h5`. Now just launch the following command to get test results.
+
 ```
 $ python ./capsnet/mains/train_capsnet_mnist.py -t -w result/trained_model.h5
 ```
 It will output the testing accuracy and show the reconstructed images.
-The testing data is same as the validation data. It will be easy to test on new data, 
-just change the code as you want.
-
-You can also just *download a model I trained* from 
-https://pan.baidu.com/s/1sldqQo1
-
+Currently, the testing data is the same as the validation data. 
 
 **Step 5. Train on multi gpus**   
 
@@ -85,12 +67,22 @@ python ./capsnet/mains/train_capsnet_mnist.py --gpus 2
 It will automatically train on multi gpus for 50 epochs and then output the performance on test dataset.
 But during training, no validation accuracy is reported.
 
+## Differences with the Paper
+- We use the learning rate decay with `decay factor = 0.9` and `step = 1 epoch`,    
+while the paper did not give the detailed parameters (or they didn't use it?).
+- We only report the test errors after `50 epochs` training.   
+In the paper, I suppose they trained for `1250 epochs` according to Figure A.1?
+Sounds crazy, maybe I misunderstood.
+- We use MSE (mean squared error) as the reconstruction loss and 
+the coefficient for the loss is `lam_recon=0.0005*784=0.392`.   
+This should be **equivalent** with using SSE (sum squared error) and `lam_recon=0.0005` as in the paper.
+
 ## Results
 
 #### Test Errors   
 
 CapsNet classification test **error** on MNIST. Average and standard deviation results are
-reported by 3 trials. The results can be reproduced by launching the following commands.   
+reported by 3 trials. The results can be reproduced by launching the following commands. 
  ```
  python ./capsnet/mains/train_capsnet_mnist.py --routings 1 --lam_recon 0.0    #CapsNet-v1
  python ./capsnet/mains/train_capsnet_mnist.py --routings 1 --lam_recon 0.392  #CapsNet-v2
@@ -140,22 +132,11 @@ different digit capsules may represent different characteristics. This is becaus
 digits are reconstructed from different feature vectors (digit capsules). These vectors are mutually 
 independent during reconstruction.
     
-![](result/manipulate-0.png)
 ![](result/manipulate-1.png)
-![](result/manipulate-2.png)
-![](result/manipulate-3.png)
-![](result/manipulate-4.png)
-![](result/manipulate-5.png)
-![](result/manipulate-6.png)
 ![](result/manipulate-7.png)
-![](result/manipulate-8.png)
-![](result/manipulate-9.png)
 
 ## Style
-This project follows PEP8 style guide.
-Additionally,
-- Use PascalCase for the variables in main().
-- Start comments with a capital letter, and end with a full stop.
+This project follows PEP8 style guide. 
 
 ## Other Implementations
 
