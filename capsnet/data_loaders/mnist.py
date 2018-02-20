@@ -37,7 +37,7 @@ class MnistLoader(object):
         generator = valid_datagen.flow(self.x_test, self.y_test, batch_size=batch_size)
         while True:
             x_batch, y_batch = generator.next()
-            yield ([x_batch, y_batch], [y_batch, x_batch])
+            yield [x_batch, y_batch]
 
     def get_mnist(self):
         return (self.x_train, self.y_train), (self.x_test, self.y_test)
