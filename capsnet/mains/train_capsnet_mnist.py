@@ -87,7 +87,7 @@ def main():
         manipulate_latent(manipulate_model, (XTest, YTest), args)
 
         print('Test the model. ')
-        test(model=eval_model, test_generator=mnist_loader.test_generator(batch_size=50), args=args)
+        test(model=eval_model, test_generator=mnist_loader.test_generator(batch_size=args.test_batch_size), args=args)
 
 
 if __name__ == "__main__":
