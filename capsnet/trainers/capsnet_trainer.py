@@ -41,7 +41,7 @@ def train(model, data_generator, args, training_callbacks):
 
 def test(model, test_generator, args, max_ims=50, plot=False):
     x_test, y_test = next(test_generator)
-    y_pred, x_recon = model.predict(x_test, batch_size=args.val_batch_size)
+    y_pred, x_recon = model.predict(x_test, batch_size=args.test_batch_size)
     print('-' * 30 + 'Begin: test' + '-' * 30)
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1)) / y_test.shape[0])
 

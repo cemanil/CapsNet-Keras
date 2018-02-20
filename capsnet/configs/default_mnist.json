@@ -38,6 +38,7 @@
   "epochs": 1,
   "tr_batch_size": 300,
   "val_batch_size": 10000,
+  "test_batch_size": 100,
   "learning_rate": 0.001,
   "lr_decay": 0.9,
   "lam_recon": 0.392,
