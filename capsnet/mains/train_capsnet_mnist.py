@@ -84,7 +84,8 @@ def main():
             print('No weights are provided. Will test using random initialized weights.')
 
         print('Try manipulating the latent variables. ')
-        manipulate_latent(manipulate_model, (XTest, YTest), args)
+        manipulate_latent(manipulate_model, test_generator=mnist_loader.test_generator(batch_size=args.test_batch_size),
+                          args=args)
 
         print('Test the model. ')
         test(model=eval_model, test_generator=mnist_loader.test_generator(batch_size=args.test_batch_size), args=args)
